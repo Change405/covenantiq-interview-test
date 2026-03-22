@@ -1,0 +1,51 @@
+environment: {}
+
+worker:
+  replicaCount: 1
+  image:
+    repository: local/service-worker
+    tag: local
+    pullPolicy: IfNotPresent
+
+  # Used for SERVICE_NAME and APP_ENV in the worker app.
+  appEnv: ""
+
+  # queue directory is shared between CronJob + Deployment.
+  queue:
+    hostPath: /tmp/takehome-queue
+
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+  podSecurityContext:
+    fsGroup: 1000
+
+  # hostPath queue dir is created as root on the node; fix ownership before app containers start.
+  queueInitImage: busybox:1.36
+
+  serviceAccount:
+    create: true
+    name: ""
+
+  rbac:
+    enabled: true
+
+  config:
+    logLevel: info
+
+  secret:
+    appToken: "takehome-placeholder"
+

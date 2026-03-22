@@ -1,0 +1,38 @@
+environment: {}
+
+serviceB:
+  replicaCount: 1
+  image:
+    repository: local/service-b
+    tag: local
+    pullPolicy: IfNotPresent
+
+  containerPort: 8080
+  appEnv: ""
+
+  probes:
+    readinessPath: ""
+    livenessPath: ""
+    readinessInitialDelaySeconds: 5
+    livenessInitialDelaySeconds: 10
+
+  resources:
+    requests: {}
+    limits: {}
+
+  securityContext: {}
+  podSecurityContext: {}
+
+  serviceAccount:
+    create: true
+    name: ""
+
+  rbac:
+    enabled: true
+
+  config:
+    logLevel: info
+
+  secret:
+    appToken: ""
+

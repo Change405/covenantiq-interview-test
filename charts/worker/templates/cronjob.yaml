@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "worker.fullname" . }}-enqueue
+  labels:
+    {{- include "worker.labels" . | nindent 4 }}
+    app.kubernetes.io/component: enqueue
+spec:
+  # Every minute. Smoke tests won't wait; they trigger enqueue deterministically.
+  schedule: "*/1 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "worker.labels" . | nindent 12 }}
+            app.kubernetes.io/component: enqueue
+        spec:
+          serviceAccountName: {{ include "worker.serviceAccountName" . }}
+{{- with .Values.worker.podSecurityContext }}
+          securityContext:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+          restartPolicy: Never
+          initContainers:
+            - name: queue-dir-init
+              image: {{ .Values.worker.queueInitImage | quote }}
+              securityContext:
+                runAsUser: 0
+              command:
+                - sh
+                - -c
+                - mkdir -p /queue/messages /queue/processed && chown -R 1000:1000 /queue
+              volumeMounts:
+                - name: queue
+                  mountPath: /queue
+          containers:
+            - name: worker-enqueue
+              image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+              imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+              env:
+                - name: SERVICE_NAME
+                  value: {{ include "worker.name" . | quote }}
+                - name: APP_ENV
+                  value: {{ default .Release.Namespace .Values.worker.appEnv | quote }}
+                - name: QUEUE_DIR
+                  value: "/queue"
+                - name: WORKER_MODE
+                  value: "enqueue_once"
+                - name: LOG_LEVEL
+                  valueFrom:
+                    configMapKeyRef:
+                      name: {{ include "worker.fullname" . }}-config
+                      key: LOG_LEVEL
+                - name: APP_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "worker.fullname" . }}-secret
+                      key: APP_TOKEN
+              # Run enqueue-once then exit; queue is shared via the hostPath volume.
+              command: ["python", "/app/app.py", "--mode", "enqueue_once"]
+              resources:
+{{- toYaml .Values.worker.resources | nindent 16 }}
+              securityContext:
+{{- toYaml .Values.worker.securityContext | nindent 16 }}
+              volumeMounts:
+                - name: queue
+                  mountPath: /queue
+          volumes:
+            - name: queue
+              hostPath:
+                path: {{ .Values.worker.queue.hostPath | quote }}
+                type: DirectoryOrCreate
+

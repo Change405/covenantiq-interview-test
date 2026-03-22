@@ -1,0 +1,21 @@
+# Needed for: ./scripts/validate_helm_requirements.sh staging, CI, deploy/smoke to staging.
+
+serviceA:
+  replicaCount: 2
+  appEnv: staging
+  config:
+    logLevel: info
+  secret:
+    appToken: takehome-placeholder
+
+serviceB:
+  replicaCount: 2
+  appEnv: staging
+  config:
+    logLevel: info
+  secret:
+    appToken: takehome-placeholder
+
+worker:
+  replicaCount: 1
+  appEnv: staging

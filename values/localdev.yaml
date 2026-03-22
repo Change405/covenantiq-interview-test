@@ -1,0 +1,22 @@
+# TODO(candidate): Task 3 — Complete serviceA and serviceB for localdev.
+# Needed for: ./scripts/validate_helm_requirements.sh localdev, make deploy-localdev, make smoke-localdev.
+
+serviceA:
+  replicaCount: 1
+  appEnv: localdev
+  config:
+    logLevel: debug
+  secret:
+    appToken: takehome-placeholder
+
+serviceB:
+  replicaCount: 1
+  appEnv: localdev
+  config:
+    logLevel: debug
+  secret:
+    appToken: takehome-placeholder
+
+worker:
+  replicaCount: 1
+  appEnv: localdev

@@ -1,0 +1,47 @@
+environment: {}
+
+serviceA:
+  replicaCount: 1
+  image:
+    repository: local/service-a
+    tag: local
+    pullPolicy: IfNotPresent
+
+  containerPort: 8080
+
+  # Used for SERVICE_NAME and APP_ENV in the sample app.
+  appEnv: ""
+
+  # Kubernetes health checks: candidate must provide these values (required by acceptance criteria).
+  probes:
+    readinessPath: ""
+    livenessPath: ""
+    readinessInitialDelaySeconds: 5
+    livenessInitialDelaySeconds: 10
+
+  # Candidate must provide requests/limits (required by acceptance criteria).
+  resources:
+    requests: {}
+    limits: {}
+
+  # Candidate must provide hardened securityContext (required by acceptance criteria).
+  securityContext: {}
+  podSecurityContext: {}
+
+  serviceAccount:
+    create: true
+    name: ""
+
+  rbac:
+    # Minimal RBAC is required. If your service does not call the Kubernetes API,
+    # document why and set enabled=false (with a scorecard note).
+    enabled: true
+
+  # Non-secret config.
+  config:
+    logLevel: info
+
+  # Secret is intentionally included for the exercise. Provide it in values, do not hard-code.
+  secret:
+    appToken: ""
+

@@ -1,0 +1,201 @@
+# Progressive CI for the take-home. Task 4 hands-on: fix intentional gaps in lint, render, and security jobs
+# (see Validation.md § Task 4) before deploy jobs can pass (also requires values, deploy.sh, Promtail, etc.).
+name: takehome-quality-gates
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: 0-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Lint charts (Task 4)
+        run: |
+          set -euo pipefail
+          helm lint ./charts/service-a
+          # TODO(candidate) Task 4 — README: run helm lint for every chart under charts/.
+          # Then remove the next two lines.
+          echo "::error::Task 4 — complete helm lint for service-b and worker (see Validation.md)."
+          exit 1
+
+  render:
+    name: 1-render
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Render manifests for all environments (Task 4)
+        run: |
+          set -euo pipefail
+          for env in localdev sandbox; do
+            echo "Rendering env=$env"
+            helm template "service-a-${env}" ./charts/service-a -n "${env}" -f "values/${env}.yaml" > /tmp/service-a-${env}.yaml
+            helm template "service-b-${env}" ./charts/service-b -n "${env}" -f "values/${env}.yaml" > /tmp/service-b-${env}.yaml
+          done
+          # TODO(candidate) Task 4 — other environments (same helm template pattern).
+          # Then remove the next two lines.
+          echo "::error::Task 4 — render must cover all four SDLC environments."
+          exit 1
+
+  security:
+    name: 2-security
+    runs-on: ubuntu-latest
+    needs: [render]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install checkov
+        run: |
+          python -m pip install --upgrade pip
+          pip install checkov
+      - name: Render all environments for security scanning
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/rendered
+          for env in localdev sandbox staging production; do
+            helm template "service-a-${env}" ./charts/service-a -n "${env}" -f "values/${env}.yaml" > "tmp/rendered/service-a-${env}.yaml"
+            helm template "service-b-${env}" ./charts/service-b -n "${env}" -f "values/${env}.yaml" > "tmp/rendered/service-b-${env}.yaml"
+          done
+      - name: Security gate (selected Kubernetes checks) (Task 4)
+        run: |
+          set -euo pipefail
+          # TODO(candidate) Task 4 — must match the render output directory in this job (tmp/rendered).
+          CHECKOV_DIR="tmp/TODO_rendered_for_checkov"
+          checkov -d "${CHECKOV_DIR}" --check "CKV_K8S_6,CKV_K8S_8,CKV_K8S_9,CKV_K8S_10,CKV_K8S_11,CKV_K8S_12,CKV_K8S_13,CKV_K8S_36"
+
+      - name: Chart requirements validator (RBAC + heuristics) (Task 4)
+        run: |
+          set -euo pipefail
+          chmod +x scripts/validate_helm_requirements.sh || true
+          # TODO(candidate) Task 4 — run scripts/validate_helm_requirements.sh for every environment (localdev, sandbox, staging, production).
+          echo "::error::Task 4 — enable validate_helm_requirements.sh for all environments in this workflow step."
+          exit 1
+
+  deploy-sandbox:
+    name: 3-deploy-sandbox
+    runs-on: ubuntu-latest
+    needs: [security]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Setup kind
+        uses: engineerd/setup-kind@v0.6.0
+      - name: Create ephemeral kind cluster (sandbox)
+        run: |
+          set -euo pipefail
+          kind create cluster --name kind-sandbox --config infra/kind/kind.yaml
+      - name: Build and load Docker images
+        run: |
+          set -euo pipefail
+          docker build -t "local/service-a:local" ./services/service-a
+          docker build -t "local/service-b:local" ./services/service-b
+          docker build -t "local/service-worker:local" ./services/worker
+          kind load docker-image "local/service-a:local" --name kind-sandbox
+          kind load docker-image "local/service-b:local" --name kind-sandbox
+          kind load docker-image "local/service-worker:local" --name kind-sandbox
+      - name: Deploy sandbox + smoke test (including Loki ingestion)
+        run: |
+          set -euo pipefail
+          chmod +x scripts/deploy.sh scripts/smoke_test.sh scripts/loki_query.sh infra/logging/install.sh scripts/validate_helm_requirements.sh || true
+          ./scripts/deploy.sh sandbox
+          ./scripts/smoke_test.sh sandbox
+      - name: Teardown kind cluster (sandbox)
+        if: always()
+        run: |
+          kind delete cluster --name kind-sandbox || true
+
+  deploy-staging:
+    name: 4-deploy-staging
+    runs-on: ubuntu-latest
+    needs: [deploy-sandbox]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Setup kind
+        uses: engineerd/setup-kind@v0.6.0
+      - name: Create ephemeral kind cluster (staging)
+        run: |
+          set -euo pipefail
+          kind create cluster --name kind-staging --config infra/kind/kind.yaml
+      - name: Build and load Docker images
+        run: |
+          set -euo pipefail
+          docker build -t "local/service-a:local" ./services/service-a
+          docker build -t "local/service-b:local" ./services/service-b
+          docker build -t "local/service-worker:local" ./services/worker
+          kind load docker-image "local/service-a:local" --name kind-staging
+          kind load docker-image "local/service-b:local" --name kind-staging
+          kind load docker-image "local/service-worker:local" --name kind-staging
+      - name: Deploy staging + smoke test (including Loki ingestion)
+        run: |
+          set -euo pipefail
+          chmod +x scripts/deploy.sh scripts/smoke_test.sh scripts/loki_query.sh infra/logging/install.sh scripts/validate_helm_requirements.sh || true
+          ./scripts/deploy.sh staging
+          ./scripts/smoke_test.sh staging
+      - name: Teardown kind cluster (staging)
+        if: always()
+        run: |
+          kind delete cluster --name kind-staging || true
+
+  deploy-production:
+    name: 5-deploy-production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    # Task 4: if the job fails on "Environment production not found", create it under Repo Settings → Environments.
+    # Manual approval is acceptable; candidates can implement this with environment protection rules.
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Setup kind
+        uses: engineerd/setup-kind@v0.6.0
+      - name: Create ephemeral kind cluster (production)
+        run: |
+          set -euo pipefail
+          kind create cluster --name kind-production --config infra/kind/kind.yaml
+      - name: Build and load Docker images
+        run: |
+          set -euo pipefail
+          docker build -t "local/service-a:local" ./services/service-a
+          docker build -t "local/service-b:local" ./services/service-b
+          docker build -t "local/service-worker:local" ./services/worker
+          kind load docker-image "local/service-a:local" --name kind-production
+          kind load docker-image "local/service-b:local" --name kind-production
+          kind load docker-image "local/service-worker:local" --name kind-production
+      - name: Deploy production + smoke test (including Loki ingestion)
+        run: |
+          set -euo pipefail
+          chmod +x scripts/deploy.sh scripts/smoke_test.sh scripts/loki_query.sh infra/logging/install.sh scripts/validate_helm_requirements.sh || true
+          ./scripts/deploy.sh production
+          ./scripts/smoke_test.sh production
+      - name: Teardown kind cluster (production)
+        if: always()
+        run: |
+          kind delete cluster --name kind-production || true
+

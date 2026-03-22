@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "service-b.fullname" . }}
+  labels:
+    {{- include "service-b.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.serviceB.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "service-b.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "service-b.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "service-b.serviceAccountName" . }}
+{{- with .Values.serviceB.podSecurityContext }}
+      securityContext:
+{{- toYaml . | nindent 8 }}
+{{- end }}
+      containers:
+        - name: http
+          image: "{{ .Values.serviceB.image.repository }}:{{ .Values.serviceB.image.tag }}"
+          imagePullPolicy: {{ .Values.serviceB.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.serviceB.containerPort }}
+          env:
+            - name: SERVICE_NAME
+              value: {{ .Chart.Name | quote }}
+            - name: APP_ENV
+              value: {{ default .Release.Namespace .Values.serviceB.appEnv | quote }}
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-b.fullname" . }}-config
+                  key: LOG_LEVEL
+            - name: APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "service-b.fullname" . }}-secret
+                  key: APP_TOKEN
+{{- if .Values.serviceB.probes.readinessPath }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.serviceB.probes.readinessPath | quote }}
+              port: http
+            initialDelaySeconds: {{ .Values.serviceB.probes.readinessInitialDelaySeconds }}
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+{{- else }}
+          {{- /* readinessProbe omitted when values.serviceB.probes.readinessPath is unset */ -}}
+{{- end }}
+{{- if .Values.serviceB.probes.livenessPath }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.serviceB.probes.livenessPath | quote }}
+              port: http
+            initialDelaySeconds: {{ .Values.serviceB.probes.livenessInitialDelaySeconds }}
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+{{- else }}
+          {{- /* livenessProbe omitted when values.serviceB.probes.livenessPath is unset */ -}}
+{{- end }}
+          resources:
+{{- toYaml .Values.serviceB.resources | nindent 12 }}
+{{- with .Values.serviceB.securityContext }}
+          securityContext:
+{{- toYaml . | nindent 12 }}
+{{- end }}
+

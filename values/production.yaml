@@ -1,0 +1,21 @@
+# Needed for: ./scripts/validate_helm_requirements.sh production, CI, deploy/smoke to production.
+
+serviceA:
+  replicaCount: 3
+  appEnv: production
+  config:
+    logLevel: warn
+  secret:
+    appToken: takehome-placeholder
+
+serviceB:
+  replicaCount: 3
+  appEnv: production
+  config:
+    logLevel: warn
+  secret:
+    appToken: takehome-placeholder
+
+worker:
+  replicaCount: 1
+  appEnv: production
