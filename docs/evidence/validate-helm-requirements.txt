@@ -1,0 +1,128 @@
+
+==> Validating requirements for service-a (env=localdev)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+==> Validating requirements for service-b (env=localdev)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+All helm requirements checks passed (heuristics).
+
+==> Validating requirements for service-a (env=sandbox)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+==> Validating requirements for service-b (env=sandbox)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+All helm requirements checks passed (heuristics).
+
+==> Validating requirements for service-a (env=staging)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+==> Validating requirements for service-b (env=staging)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+All helm requirements checks passed (heuristics).
+
+==> Validating requirements for service-a (env=production)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+==> Validating requirements for service-b (env=production)
+OK:   readinessProbe exists
+OK:   livenessProbe exists
+OK:   ConfigMap wiring exists (configMapKeyRef present)
+OK:   ConfigMap key used (LOG_LEVEL)
+OK:   Secret wiring exists (secretKeyRef present)
+OK:   Secret key used (APP_TOKEN)
+OK:   resources.requests is non-empty (heuristic)
+OK:   resources.limits is non-empty (heuristic)
+OK:   securityContext hardening (runAsNonRoot)
+OK:   securityContext drop capabilities present
+OK:   ServiceAccount present
+OK:   RoleBinding present
+OK:   RBAC role rules verbs are non-empty
+
+All helm requirements checks passed (heuristics).

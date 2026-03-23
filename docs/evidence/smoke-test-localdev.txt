@@ -1,0 +1,25 @@
+./scripts/smoke_test.sh "localdev"
+==> Smoke test: health endpoints
+deployment.apps/service-a-service-a condition met
+deployment.apps/service-b-service-b condition met
+deployment.apps/worker-worker condition met
+==> Health endpoints OK
+==> Logging ingestion check (strict)
+==> Loki query: {namespace="localdev",service="service-a"} |= "healthz_ok"
+==> Port-forwarding loki (namespace=logging) to localhost:3100
+==> Querying Loki for ingested health logs (with retries)
+==> Loki results: 1 stream(s)
+OK: Loki ingestion verified.
+==> Loki query: {namespace="localdev",service="service-b"} |= "healthz_ok"
+==> Port-forwarding loki (namespace=logging) to localhost:3100
+==> Querying Loki for ingested health logs (with retries)
+==> Loki results: 1 stream(s)
+OK: Loki ingestion verified.
+==> Triggering worker enqueue_once inside consumer pod
+Defaulted container "worker" out of: worker, queue-dir-init (init)
+{"ts": "2026-03-23T00:46:07.225601+00:00", "level": "info", "service": "worker", "event": "queue_enqueued", "env": "localdev", "messageId": "7268498f-5f95-4338-a115-2437f4fd85e8"}
+==> Loki query: {namespace="localdev",service="worker"} |= "queue_processed"
+==> Port-forwarding loki (namespace=logging) to localhost:3100
+==> Querying Loki for ingested health logs (with retries)
+==> Loki results: 1 stream(s)
+OK: Loki ingestion verified.
