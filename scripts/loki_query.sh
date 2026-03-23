@@ -41,14 +41,13 @@ for _ in $(seq 1 30); do
 
   if [[ -n "${resp:-}" ]]; then
     count="$(
-      python3 - <<'PY'
+      echo "${resp}" | python3 -c "
 import json,sys
 raw=sys.stdin.read()
 data=json.loads(raw)
-results=data.get("data",{}).get("result",[])
+results=data.get('data',{}).get('result',[])
 print(len(results))
-PY
-      <<<"${resp}"
+"
     )" || count=0
   fi
 

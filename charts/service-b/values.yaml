@@ -11,16 +11,27 @@ serviceB:
   appEnv: ""
 
   probes:
-    readinessPath: ""
-    livenessPath: ""
+    readinessPath: /healthz
+    livenessPath: /healthz
     readinessInitialDelaySeconds: 5
     livenessInitialDelaySeconds: 10
 
   resources:
-    requests: {}
-    limits: {}
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
 
-  securityContext: {}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   podSecurityContext: {}
 
   serviceAccount:

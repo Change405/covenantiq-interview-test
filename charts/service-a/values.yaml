@@ -14,18 +14,29 @@ serviceA:
 
   # Kubernetes health checks: candidate must provide these values (required by acceptance criteria).
   probes:
-    readinessPath: ""
-    livenessPath: ""
+    readinessPath: /healthz
+    livenessPath: /healthz
     readinessInitialDelaySeconds: 5
     livenessInitialDelaySeconds: 10
 
   # Candidate must provide requests/limits (required by acceptance criteria).
   resources:
-    requests: {}
-    limits: {}
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
 
   # Candidate must provide hardened securityContext (required by acceptance criteria).
-  securityContext: {}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   podSecurityContext: {}
 
   serviceAccount:

@@ -12,14 +12,13 @@ RELEASE_NAME_WORKER="worker"
 LOGGING_NAMESPACE="${LOGGING_NAMESPACE:-logging}"
 SERVICE_NAMESPACE="${ENVIRONMENT}"
 
-# TODO(candidate) Task 3 — One values overlay per environment for all three charts (no chart forks).
-# Fix this path so it resolves to the real file: values/<environment>.yaml (honour HELM_VALUES_DIR if you use it).
-VALUES_FILE="${HELM_VALUES_DIR:-values}/TODO_overlay_${ENVIRONMENT}.yaml"
+VALUES_FILE="${HELM_VALUES_DIR:-values}/${ENVIRONMENT}.yaml"
 if [[ ! -f "${VALUES_FILE}" ]]; then
-  echo "ERROR: Task 3 — ${VALUES_FILE} does not exist."
-  echo "      Edit scripts/deploy.sh: set VALUES_FILE to \"\${HELM_VALUES_DIR:-values}/\${ENVIRONMENT}.yaml\""
+  echo "ERROR: ${VALUES_FILE} does not exist."
   exit 1
 fi
+
+APP_TOKEN="${APP_TOKEN:?APP_TOKEN env var must be set}"
 
 if [[ "${ENVIRONMENT}" == "localdev" ]] && command -v docker >/dev/null 2>&1; then
   for img in "local/service-a:local" "local/service-b:local" "local/service-worker:local"; do
@@ -38,11 +37,13 @@ kubectl create namespace "${SERVICE_NAMESPACE}" 2>/dev/null || true
 
 helm upgrade --install "${RELEASE_NAME_A}" ./charts/service-a \
   --namespace "${SERVICE_NAMESPACE}" \
-  --values "${VALUES_FILE}"
+  --values "${VALUES_FILE}" \
+  --set serviceA.secret.appToken="${APP_TOKEN}"
 
 helm upgrade --install "${RELEASE_NAME_B}" ./charts/service-b \
   --namespace "${SERVICE_NAMESPACE}" \
-  --values "${VALUES_FILE}"
+  --values "${VALUES_FILE}" \
+  --set serviceB.secret.appToken="${APP_TOKEN}"
 
 echo "==> Waiting for deployments to become available"
 
@@ -52,7 +53,8 @@ WORKER_DEPLOY="${RELEASE_NAME_WORKER}-${RELEASE_NAME_WORKER}"
 
 helm upgrade --install "${RELEASE_NAME_WORKER}" ./charts/worker \
   --namespace "${SERVICE_NAMESPACE}" \
-  --values "${VALUES_FILE}"
+  --values "${VALUES_FILE}" \
+  --set worker.secret.appToken="${APP_TOKEN}"
 
 wait_rollout() {
   local deploy="$1"

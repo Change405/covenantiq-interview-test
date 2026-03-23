@@ -1,4 +1,4 @@
-.PHONY: kind-up kind-down build-images load-images deploy-localdev deploy-sandbox deploy-staging deploy-production smoke-localdev smoke-sandbox smoke-staging smoke-production
+.PHONY: kind-up kind-down build-images load-images
 
 KIND_CLUSTER_NAME ?= local-takehome
 KIND_CONFIG ?= infra/kind/kind.yaml
@@ -33,6 +33,4 @@ deploy-%:
 smoke-%:
 	./scripts/smoke_test.sh "$*"
 
-deploy-localdev deploy-sandbox deploy-staging deploy-production: deploy-%
-smoke-localdev smoke-sandbox smoke-staging smoke-production: smoke-%
 
