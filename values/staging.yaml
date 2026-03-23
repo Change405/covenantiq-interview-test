@@ -5,17 +5,15 @@ serviceA:
   appEnv: staging
   config:
     logLevel: info
-  secret:
-    appToken: takehome-placeholder
 
 serviceB:
   replicaCount: 2
   appEnv: staging
   config:
     logLevel: info
-  secret:
-    appToken: takehome-placeholder
 
 worker:
   replicaCount: 1
   appEnv: staging
+  config:
+    logLevel: info

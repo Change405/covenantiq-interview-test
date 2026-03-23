@@ -47,5 +47,5 @@ worker:
     logLevel: info
 
   secret:
-    appToken: "takehome-placeholder"
+    appToken: ""
 

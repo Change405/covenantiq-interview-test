@@ -5,17 +5,15 @@ serviceA:
   appEnv: sandbox
   config:
     logLevel: info
-  secret:
-    appToken: takehome-placeholder
 
 serviceB:
   replicaCount: 1
   appEnv: sandbox
   config:
     logLevel: info
-  secret:
-    appToken: takehome-placeholder
 
 worker:
   replicaCount: 1
   appEnv: sandbox
+  config:
+    logLevel: info
