@@ -200,3 +200,7 @@ Was a TODO stub that exited with an error. Added a loop to run the validation sc
 ### Deploy jobs — `APP_TOKEN` injection
 
 All three deploy jobs (`sandbox`, `staging`, `production`) now pass `APP_TOKEN` from a GitHub Actions secret (`${{ secrets.APP_TOKEN }}`) as an environment variable. This is consumed by `deploy.sh` which injects it into each Helm release via `--set`.
+
+### Deploy jobs — replaced `engineerd/setup-kind@v0.6.0`
+
+The `engineerd/setup-kind@v0.6.0` action is unmaintained and fails on current GitHub runners with a missing `node_modules/.bin/json5` error. Replaced with a direct `curl` install of kind v0.27.0 from the official release URL. This is more reliable and avoids depending on a third-party action that may break again.

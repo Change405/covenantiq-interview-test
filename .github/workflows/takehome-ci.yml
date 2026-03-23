@@ -91,7 +91,10 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
       - name: Setup kind
-        uses: engineerd/setup-kind@v0.6.0
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
       - name: Create ephemeral kind cluster (sandbox)
         run: |
           set -euo pipefail
@@ -129,7 +132,10 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
       - name: Setup kind
-        uses: engineerd/setup-kind@v0.6.0
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
       - name: Create ephemeral kind cluster (staging)
         run: |
           set -euo pipefail
@@ -170,7 +176,10 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
       - name: Setup kind
-        uses: engineerd/setup-kind@v0.6.0
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
       - name: Create ephemeral kind cluster (production)
         run: |
           set -euo pipefail
